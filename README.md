@@ -47,18 +47,45 @@ More information [here](https://docs.aws.amazon.com/STS/latest/APIReference/API_
 
 Well that just makes sense, this is a **Rust** application. The easiest way to get started is by using [rustup](https://www.rust-lang.org/tools/install)
 
+Now, you need some additional packages to be able to compile **pristup**. Namely you need the `build-essential` (or similar) package group. Depending on your operating system, and package manager the name may differ.
+
+**Ubuntu/Debian:**
+```
+sudo apt install build-essential
+```
+
+**Arch Linux:**
+```
+sudo pacman -S base-devel
+```
+
+**MacOS:**
+```
+xcode-select --install
+```
+
+**Amazon Linux/Red Hat/CentOS:**
+```
+yum groupinstall "Development Tools"
+```
+
 ### Clone the Repository 💾
 
-As of this date, there is no way to *install* this tool to your machine in a traditional sense. Some elements are hardcoded paths (ie the `pristup.toml` file). And thus, the way you use **Pristup** is by cloning this repository somewhere locally:
+To install this package, you can just run `cargo install pristup`
+
+This will install the compiled binary into your `$CARGO_HOME/bin` directory. If you have the `$PATH` set up correctly you should be able to run it now. But before you do ...
+
+Let's initialize the configuration. Because **pristup** uses a configuration file (`pristup.toml`) it needs to be stored inside of your `$HOME/.config/bedrust` directory. *Now*, you can do this manually, but we have a feature to do it for you. Just run:
 ```
-git clone https://github.com/darko-mesaros/pristup && cd pristup
+pristup --init
 ```
+After entering the AWS Account ID and the Role you wish to assume, it will create all the necessary files for you to be able to use **pristup**. There is no need to modify these files, unless you want to.
 
 ### Running the application 🚀
 
-Finally, to run the application just use the following `cargo` command:
+Finally, to run the application just run:
 ```bash
-cargo run <PARAMETERS>
+pristup
 ```
 
 ## Usage 🔧
@@ -69,6 +96,7 @@ Options:
   -a, --account <ACCOUNT>
   -r, --role <ROLE>
   -s, --session-name <SESSION_NAME>
+      --init
   -h, --help                         Print help
   -V, --version                      Print version
 ```
@@ -80,21 +108,6 @@ This will print out the URL to `stdout`. Just click it, copy it, do whatever. �
 There are two ways of passing the configuration items (account ID, role, and session name) to **Pristup**:
 
 - Using the command line parameters
-- Via the `pristup.toml` configuration file
+- Via the `pristup.toml` configuration file that is located in your `$HOME/.config/pristup` directory
 
-By default, the application looks for command line parameters first. If none are supplied, it gets them from the configuration file located in the root of the repository (`pristup.toml`). This file, with some dummy values is supplied within this repository.
-
-## TODO 📋
-
-- [ ] Handle the configuration file properly (look in $HOME/.config)
-- [ ] Use `xdg-open` to automatically open the browser (where possible)
-- [ ] Generate temporary CLI credentials for sharing
-- [ ] Generate temporary S3 bucket upload permissions
-
-## Version Log 📜
-
-### 0.1.0
-- Base functionality
-- Generates an URL for temporary console access
-- Handles parameters and configuration files (almost)
-
+By default, the application looks for command line parameters first. If none are supplied, it gets them from the configuration file. 

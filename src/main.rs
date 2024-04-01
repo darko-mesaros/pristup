@@ -1,4 +1,5 @@
 pub mod utils;
+pub mod constants;
 
 use tracing::Level;
 use pristup::{assume_role, get_caller_identity};
@@ -16,9 +17,9 @@ async fn main() -> Result<(), anyhow::Error>{
     let sts_client = aws_sdk_sts::Client::new(&config);
 
     println!("----------------------------------------");
-    println!("🔑 | Assuming role as:");
-    println!("👤 | {}", get_caller_identity(&sts_client).await?);
-    println!("🌍 | Generating the console URL...");
+    println!("🔑| Assuming role as:");
+    println!("👤| {}", get_caller_identity(&sts_client).await?);
+    println!("🌍| Generating the console URL...");
     println!();
 
     // TODO: Handle the printing here
