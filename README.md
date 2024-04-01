@@ -69,6 +69,8 @@ xcode-select --install
 yum groupinstall "Development Tools"
 ```
 
+**Additionally**, you *may* need the `pkg-config` and `libssl-dev` packages (or their equivalents), depending on your operating system.
+
 ### Clone the Repository 💾
 
 To install this package, you can just run `cargo install pristup`
