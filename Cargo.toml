@@ -1,10 +1,18 @@
 [package]
 name = "pristup"
-version = "0.1.0"
+description = "A command line tool that generates URLs to let you assume Roles on your AWS account"
+version = "0.2.0"
 edition = "2021"
 authors = ["Darko Mesaros <d@rko.rs>"]
 license = "MIT OR Apache-2.0"
-keywords = ["aws", "iam"]
+keywords = ["aws", "iam", "federated-access", "role-assume"]
+categories = ["command-line-utilities"]
+readme = "README.md"
+homepage = "https://rup12.net"
+repository = "https://github.com/darko-mesaros/pristup"
+exclude = [
+"img/*"
+]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -16,6 +24,9 @@ aws-smithy-types = "1.1.8"
 aws-types = "1.1.8"
 bytes = "1.5.0"
 clap = { version = "4.5.2", features = ["derive"] }
+colored = "2.1.0"
+dirs = "5.0.1"
+regex = "1.10.4"
 reqwest = { version = "0.12.1", features = ["json"] }
 serde = { version = "1.0.197", features = ["derive"] }
 serde_derive = "1.0.197"
