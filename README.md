@@ -98,6 +98,7 @@ Options:
   -a, --account <ACCOUNT>
   -r, --role <ROLE>
   -s, --session-name <SESSION_NAME>
+  -t  --timeout <TIMEOUT>
       --init
   -h, --help                         Print help
   -V, --version                      Print version

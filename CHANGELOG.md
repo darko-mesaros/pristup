@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TODO: Generate temporary CLI credentials for sharing
 - TODO: Generate temporary S3 bucket upload permissions
 
+## [0.2.1] - 2024-04-30
+### Added
+- The ability to configure the timeout duration
+
+### Changed
+- Fixed some unoptimized code
+
 ## [0.2.0] - 2024-03-31
 ### Added
 - Now installable. Will create configuration files for you in your `$HOME/.config/pristup` directory
