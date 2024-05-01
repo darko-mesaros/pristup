@@ -25,6 +25,12 @@ impl UrlCredentials {
     }
 }
 
+impl UrlCredentials {
+    fn to_json(&self) -> Result<String, anyhow::Error> {
+        Ok(serde_json::to_string(&self)?)
+    }
+}
+
 pub async fn get_caller_identity(client: &Client) -> Result<String, anyhow::Error> {
     let response = client.get_caller_identity().send().await?;
     let user_arn = response
@@ -37,8 +43,9 @@ pub async fn assume_role(
     role: String,
     account: String,
     session: String,
+    timeout: i32,
     c: Client,
-) -> Result<(), anyhow::Error> {
+) -> Result<String, anyhow::Error> {
     let result = c
         .assume_role()
         .role_arn(format!("arn:aws:iam::{}:role/{}", account, role))
@@ -48,23 +55,23 @@ pub async fn assume_role(
 
     let id = result
         .credentials()
-        .ok_or_else(|| anyhow!("Unable to get the Access Key ID"))?
+        .ok_or_else(|| anyhow!("Unable to get the Access Key ID from the assume_role call"))?
         .access_key_id();
     let key = result
         .credentials()
-        .ok_or_else(|| anyhow!("Unable to get the Secret Access Key"))?
+        .ok_or_else(|| anyhow!("Unable to get the Secret Access Key from the assume_role call"))?
         .secret_access_key();
     let token = result
         .credentials()
-        .ok_or_else(|| anyhow!("Unable to get the Session Token"))?
+        .ok_or_else(|| anyhow!("Unable to get the Session Token from the assume_role call"))?
         .session_token();
-    // TODO: This can be cleaned up
-    let creds = UrlCredentials::new(id.to_string(), key.to_string(), token.to_string());
-    let json_creds = serde_json::to_string(&creds)?;
-    let url_creds = urlencoding::encode(json_creds.as_str());
+    // converts the new credentials to a json string
+    let creds = UrlCredentials::new(id.to_string(), key.to_string(), token.to_string())
+        .to_json()?;
+    // encodes the credentials
+    let url_creds = urlencoding::encode(creds.as_str());
 
-    // TODO: Make the duration configurable
-    let req_url = format!("https://signin.aws.amazon.com/federation?Action=getSigninToken&SessionDuration=43200&Session={}",url_creds);
+    let req_url = format!("https://signin.aws.amazon.com/federation?Action=getSigninToken&SessionDuration={}&Session={}",timeout,url_creds);
     let req_url = Url::parse(req_url.as_str())?;
 
     let resp = reqwest::get(req_url)
@@ -76,8 +83,7 @@ pub async fn assume_role(
         .get("SigninToken")
         .ok_or_else(|| anyhow!("Unable to get the SigninToken from the inital request"))?;
 
-    let url = format!("https://signin.aws.amazon.com/federation?Action=login&Issuer=Example.org&Destination={}&SigninToken={}", urlencoding::encode("https://console.aws.amazon.com/"), signin_token);
-    println!("{}", url);
+    // return the url
+    Ok(format!("https://signin.aws.amazon.com/federation?Action=login&Issuer=Example.org&Destination={}&SigninToken={}", urlencoding::encode("https://console.aws.amazon.com/"), signin_token))
 
-    Ok(())
 }

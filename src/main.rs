@@ -22,14 +22,14 @@ async fn main() -> Result<(), anyhow::Error> {
     println!("🌍| Generating the console URL...");
     println!();
 
-    // TODO: Handle the printing here
-    assume_role(
+    println!("{}", assume_role(
         pristup_config.role,
         pristup_config.account_id,
         pristup_config.session_name,
+        pristup_config.timeout,
         sts_client,
     )
-    .await?;
+    .await?);
 
     Ok(())
 }

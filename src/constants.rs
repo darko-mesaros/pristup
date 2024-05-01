@@ -7,4 +7,5 @@ pub static CONFIG_FILE_CONTENTS: &str = r#"[config]
 account_id = "%ACCOUNT_ID%"
 role = "%ROLE%"
 session_name = "Pristup"
+timeout = %TIMEOUT%
 "#;

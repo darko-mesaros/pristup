@@ -75,6 +75,7 @@ pub fn initialize_config() -> Result<(), anyhow::Error> {
             // we're good
             break;
         } else {
+            account_id.clear();
             println!("Invalid account ID. Please entre a 12 digit number.")
         }
     }
@@ -87,16 +88,46 @@ pub fn initialize_config() -> Result<(), anyhow::Error> {
         io::stdin().read_line(&mut role_name)?;
 
         if role_name.trim().is_empty() {
+            account_id.clear();
             println!("The role name cannot be blank. Please try again.")
         } else {
             // we're good
             break;
         }
     }
+    // timeout loop
+    let timeout: i32 = 'timeout: loop {
+        let mut timeout_string = String::new();
+        print!("\nEnter the timeout duration in seconds: ");
+        io::stdout().flush()?; // so the answers are typed on the same line as above
+        io::stdin().read_line(&mut timeout_string)?;
+
+        if timeout_string.trim().is_empty() {
+            println!("The role name cannot be blank. Please try again.")
+        } else {
+            match timeout_string.trim().parse() {
+                Ok(num) => { 
+                    //SessionDuration
+                    //900 seconds (15 minutes) up to a maximum of 129,600 seconds (36 hours).
+                    if num > 900 && num < 129600 { 
+                        break 'timeout num
+                    } else {
+                        println!("Invalid timeout input, Please enter a number between 900 and 129600.");
+                        continue;
+                    }
+                }
+                Err(e) => {
+                    println!("Invalid timeout input, please enter an integer: {}", e);
+                    continue;
+                }
+            };
+        }
+    };
 
     let mut config_replacements = std::collections::HashMap::new();
-    config_replacements.insert("%ACCOUNT_ID%", account_id.trim());
-    config_replacements.insert("%ROLE%", role_name.trim());
+    config_replacements.insert("%ACCOUNT_ID%", account_id.trim().to_string());
+    config_replacements.insert("%ROLE%", role_name.trim().to_string());
+    config_replacements.insert("%TIMEOUT%", timeout.to_string());
 
     let home_dir = home_dir().expect("Failed to get HOME directory");
     let config_dir = home_dir.join(format!(".config/{}", constants::CONFIG_DIR_NAME));
@@ -127,6 +158,7 @@ pub struct TomlConfig {
     pub account_id: Option<String>,
     pub role: Option<String>,
     pub session_name: Option<String>,
+    pub timeout: Option<i32>,
 }
 
 impl FileConfig {
@@ -154,7 +186,9 @@ pub struct Args {
     pub role: Option<String>,
     #[arg(short, long)]
     pub session_name: Option<String>,
-    #[arg(long, conflicts_with_all(["account", "role", "session_name"]))]
+    #[arg(short, long)]
+    pub timeout: Option<i32>,
+    #[arg(long, conflicts_with_all(["account", "role", "session_name", "timeout"]))]
     pub init: bool,
 }
 //======================================== END ARGUMENT PARSING
@@ -163,6 +197,7 @@ pub struct Config {
     pub account_id: String,
     pub role: String,
     pub session_name: String,
+    pub timeout: i32,
 }
 pub fn parse_config() -> Result<Config, anyhow::Error> {
     // parse arguments
@@ -217,6 +252,9 @@ pub fn parse_config() -> Result<Config, anyhow::Error> {
             session_name: arguments
                 .session_name
                 .ok_or_else(|| anyhow!("Unable to parse session from arguments"))?,
+            timeout: arguments
+                .timeout
+                .ok_or_else(|| anyhow!("Unable to parse timeout duration from arguments"))?,
         })
     } else {
         // if not check for config file
@@ -228,6 +266,7 @@ pub fn parse_config() -> Result<Config, anyhow::Error> {
             let config_file_path = config_dir.join(constants::CONFIG_FILE_NAME);
             let pristup_config = FileConfig::load_config(config_file_path)?;
 
+            // TODO: This could be a function or a macro?
             let role = if arguments.role.is_some() {
                 arguments.role
             } else {
@@ -246,10 +285,17 @@ pub fn parse_config() -> Result<Config, anyhow::Error> {
                 pristup_config.config.session_name
             }.ok_or_else(||anyhow!("Unable to parse the session name. Either add it as a parameter, or make sure you have the config file set up."))?;
 
+            let timeout = if arguments.timeout.is_some() {
+                arguments.timeout
+            } else {
+                pristup_config.config.timeout
+            }.ok_or_else(||anyhow!("Unable to parse the timeout duration. Either add it as a parameter, or make sure you have the config file set up."))?;
+
             Ok(Config {
                 account_id,
                 role,
                 session_name,
+                timeout,
             })
         } else {
             // if the config file is not present
