@@ -1,11 +1,11 @@
-pub mod utils;
 pub mod constants;
+pub mod utils;
 
-use tracing::Level;
 use pristup::{assume_role, get_caller_identity};
+use tracing::Level;
 
 #[tokio::main]
-async fn main() -> Result<(), anyhow::Error>{
+async fn main() -> Result<(), anyhow::Error> {
     // configure tracing
     utils::configure_tracing(Level::WARN);
 
@@ -23,7 +23,13 @@ async fn main() -> Result<(), anyhow::Error>{
     println!();
 
     // TODO: Handle the printing here
-    assume_role(pristup_config.role, pristup_config.account_id, pristup_config.session_name, sts_client).await?;
+    assume_role(
+        pristup_config.role,
+        pristup_config.account_id,
+        pristup_config.session_name,
+        sts_client,
+    )
+    .await?;
 
     Ok(())
 }
