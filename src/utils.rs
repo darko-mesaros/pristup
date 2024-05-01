@@ -116,6 +116,11 @@ pub fn initialize_config() -> Result<(), anyhow::Error>{
 //======================================== CONFIG FILE PARSING
 #[derive(Deserialize)]
 pub struct FileConfig {
+    pub config: TomlConfig
+}
+
+#[derive(Deserialize)]
+pub struct TomlConfig {
     pub account_id: Option<String>,
     pub role: Option<String>,
     pub session_name: Option<String>
@@ -219,19 +224,19 @@ pub fn parse_config() -> Result<Config, anyhow::Error> {
             let role = if arguments.role.is_some() {
                 arguments.role
             } else {
-                pristup_config.role
+                pristup_config.config.role
             }.ok_or_else(||anyhow!("Unable to parse the role. Either add it as a parameter, or make sure you have the config file set up."))?;
 
             let account_id = if arguments.account.is_some() {
                 arguments.account
             } else {
-                pristup_config.account_id
+                pristup_config.config.account_id
             }.ok_or_else(||anyhow!("Unable to parse the account id. Either add it as a parameter, or make sure you have the config file set up."))?;
 
             let session_name = if arguments.session_name.is_some() {
                 arguments.session_name
             } else {
-                pristup_config.session_name
+                pristup_config.config.session_name
             }.ok_or_else(||anyhow!("Unable to parse the session name. Either add it as a parameter, or make sure you have the config file set up."))?;
 
             Ok(Config {
