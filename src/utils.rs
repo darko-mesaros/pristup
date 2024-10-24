@@ -22,6 +22,10 @@ use dirs::home_dir;
 
 use crate::constants;
 
+use clipboard_ext::prelude::*;
+use clipboard_ext::x11_fork::ClipboardContext;
+
+
 //======================================== TRACING
 pub fn configure_tracing(level: Level) {
     let subscriber = FmtSubscriber::builder()
@@ -159,6 +163,7 @@ pub struct TomlConfig {
     pub role: Option<String>,
     pub session_name: Option<String>,
     pub timeout: Option<i32>,
+    pub use_clipboard: Option<bool>,
 }
 
 impl FileConfig {
@@ -190,6 +195,8 @@ pub struct Args {
     pub timeout: Option<i32>,
     #[arg(long, conflicts_with_all(["account", "role", "session_name", "timeout"]))]
     pub init: bool,
+    #[arg(short, long)]
+    pub clipboard: Option<bool>,
 }
 //======================================== END ARGUMENT PARSING
 //======================================== CONFIG PARSING
@@ -198,6 +205,7 @@ pub struct Config {
     pub role: String,
     pub session_name: String,
     pub timeout: i32,
+    pub use_clipboard: Option<bool>,
 }
 pub fn parse_config() -> Result<Config, anyhow::Error> {
     // parse arguments
@@ -240,7 +248,7 @@ pub fn parse_config() -> Result<Config, anyhow::Error> {
     }
 
     // check if all arguments are preset
-    if arguments.account.is_some() && arguments.session_name.is_some() && arguments.role.is_some() {
+    if arguments.account.is_some() && arguments.session_name.is_some() && arguments.role.is_some() && arguments.clipboard.is_some() {
         // all arguments are present return them
         Ok(Config {
             account_id: arguments
@@ -255,6 +263,10 @@ pub fn parse_config() -> Result<Config, anyhow::Error> {
             timeout: arguments
                 .timeout
                 .ok_or_else(|| anyhow!("Unable to parse timeout duration from arguments"))?,
+            use_clipboard: Some(arguments // NOTE: Adding Some as the field is an option - I should apply
+                // this to others
+                .clipboard)
+                .ok_or_else(|| anyhow!("Unable to parse clipboard usage from arguments"))?,
         })
     } else {
         // if not check for config file
@@ -290,12 +302,19 @@ pub fn parse_config() -> Result<Config, anyhow::Error> {
             } else {
                 pristup_config.config.timeout
             }.ok_or_else(||anyhow!("Unable to parse the timeout duration. Either add it as a parameter, or make sure you have the config file set up."))?;
+            // FIX: Sort out the Option<bool> here for others
+            let use_clipboard = if arguments.clipboard.is_some() {
+                Some(arguments.clipboard)
+            } else {
+                Some(pristup_config.config.use_clipboard)
+            }.ok_or_else(||anyhow!("Unable to parse the clipboard usage. Either add it as a parameter, or make sure you have the config file set up."))?;
 
             Ok(Config {
                 account_id,
                 role,
                 session_name,
                 timeout,
+                use_clipboard,
             })
         } else {
             // if the config file is not present
@@ -315,3 +334,12 @@ pub fn parse_config() -> Result<Config, anyhow::Error> {
 pub fn print_warning(s: &str) {
     println!("{}", s.yellow());
 }
+
+// Store the prisigned url into clipboard
+pub fn set_into_clipboard(s: String) -> Result<(), Box<dyn std::error::Error>> {
+    // NOTE: Uses the rust-clipboard-ext crate. Forks the process and sets the x11 clipboard
+    let mut ctx: ClipboardContext = ClipboardContext::new()?;
+    ctx.set_contents(s.to_owned()).unwrap();
+    Ok(())
+}
+

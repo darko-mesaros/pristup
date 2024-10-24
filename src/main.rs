@@ -22,14 +22,28 @@ async fn main() -> Result<(), anyhow::Error> {
     println!("🌍| Generating the console URL...");
     println!();
 
-    println!("{}", assume_role(
+    // Better error handling from the assume_role function
+    match assume_role(
         pristup_config.role,
         pristup_config.account_id,
         pristup_config.session_name,
         pristup_config.timeout,
-        sts_client,
-    )
-    .await?);
+        sts_client)
+    .await {
+        Ok(url) => {
 
+            // If we set the parameter to use the clipboard, set the URL in the clipboard
+            if pristup_config.use_clipboard.unwrap_or(false) {
+                // TODO: see if you can avoid a clone()
+                if let Err(e) = utils::set_into_clipboard(url.clone()) {
+                    eprintln!("Error setting clipboard: {}",e);
+                }
+            }
+
+            // Print out the URL
+            println!("{}", url);
+        },
+        Err(e) => eprintln!("Something went wrong while generating the presigned URL: {}", e),
+    }
     Ok(())
 }

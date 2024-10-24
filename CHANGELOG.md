@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TODO: Generate temporary CLI credentials for sharing
 - TODO: Generate temporary S3 bucket upload permissions
 
+## [0.2.2] - 2024-10-24
+### Added
+- You can now put the URL directly into your clipboard
+
 ## [0.2.1] - 2024-04-30
 ### Added
 - The ability to configure the timeout duration

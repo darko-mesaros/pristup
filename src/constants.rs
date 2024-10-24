@@ -8,4 +8,5 @@ account_id = "%ACCOUNT_ID%"
 role = "%ROLE%"
 session_name = "Pristup"
 timeout = %TIMEOUT%
+use_clipboard = False
 "#;

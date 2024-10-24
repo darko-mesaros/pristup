@@ -1,7 +1,7 @@
 [package]
 name = "pristup"
 description = "A command line tool that generates URLs to let you assume Roles on your AWS account"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = ["Darko Mesaros <d@rko.rs>"]
 license = "MIT OR Apache-2.0"
@@ -24,6 +24,7 @@ aws-smithy-types = "1.1.8"
 aws-types = "1.1.8"
 bytes = "1.5.0"
 clap = { version = "4.5.2", features = ["derive"] }
+clipboard-ext = "0.2.0"
 colored = "2.1.0"
 dirs = "5.0.1"
 regex = "1.10.4"
